@@ -20,7 +20,7 @@ DATASET_PATH = "tests/golden_dataset.json"
 try:
     # Add the current directory to sys.path to allow imports
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-    from agent import root_agent as local_agent
+    from agent import adk_app
 except ImportError as e:
     print(f"Error importing agent: {e}")
     sys.exit(1)
@@ -51,17 +51,20 @@ if __name__ == "__main__":
     client = vertexai.Client(project=PROJECT_ID, location=LOCATION)
 
     # Define the deployment configuration
-    deployment_config = {
-        "display_name": "Customer Service Agent",
-        "description": "Retail customer service agent",
-        "source_packages": ["agent.py", "pyproject.toml", "README.md", "requirements.txt"],
-        "entrypoint_module": "agent",
-        "entrypoint_object": "root_agent",
-    }
-
     try:
         remote_agent = client.agent_engines.create(
-            config=deployment_config,
+            agent=adk_app,
+            config=dict(
+                display_name="Customer Service Agent",
+                description="Retail customer service agent",
+                requirements=[
+                    "google-cloud-aiplatform[agent_engines,evaluation]",
+                    "google-adk",
+                    "pandas",
+                    "python-dotenv"
+                ],
+                staging_bucket=STAGING_BUCKET,
+            ),
         )
         print(f"✅ Agent Deployed Successfully!")
         print(f"🔗 Resource Name: {remote_agent.resource_name}")

@@ -3,6 +3,7 @@ import os
 from typing import Dict, List, Any
 from dotenv import load_dotenv
 from google.adk.agents import Agent
+from vertexai import agent_engines
 
 load_dotenv()
 
@@ -131,3 +132,4 @@ agent = Agent(
 )
 
 root_agent = agent
+adk_app = agent_engines.AdkApp(agent=agent, enable_tracing=True)
