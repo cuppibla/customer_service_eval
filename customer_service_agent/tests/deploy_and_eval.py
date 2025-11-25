@@ -20,6 +20,8 @@ DATASET_PATH = "tests/golden_dataset.json"
 try:
     # Add the current directory to sys.path to allow imports
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    # No need to import adk_app here for Inline Source deployment, 
+    # but we keep it for local validation if needed.
     from agent import adk_app
 except ImportError as e:
     print(f"Error importing agent: {e}")
@@ -50,21 +52,19 @@ if __name__ == "__main__":
     # Initialize Vertex AI Client
     client = vertexai.Client(project=PROJECT_ID, location=LOCATION)
 
-    # Define the deployment configuration
+    # Define the deployment configuration for Inline Source
+    deployment_config = {
+        "display_name": "Customer Service Agent",
+        "description": "Retail customer service agent",
+        "source_packages": ["agent.py", "pyproject.toml", "README.md", "requirements.txt"],
+        "entrypoint_module": "agent",
+        "entrypoint_object": "adk_app",
+    }
+
     try:
+        # For Inline Source, we pass config but NOT the agent object directly
         remote_agent = client.agent_engines.create(
-            agent=adk_app,
-            config=dict(
-                display_name="Customer Service Agent",
-                description="Retail customer service agent",
-                requirements=[
-                    "google-cloud-aiplatform[agent_engines,evaluation]",
-                    "google-adk",
-                    "pandas",
-                    "python-dotenv"
-                ],
-                staging_bucket=STAGING_BUCKET,
-            ),
+            config=deployment_config,
         )
         print(f"✅ Agent Deployed Successfully!")
         print(f"🔗 Resource Name: {remote_agent.resource_name}")
