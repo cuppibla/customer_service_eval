@@ -1,0 +1,36 @@
+steps:
+  # ---------------------------------------------------------
+  # STEP 1: Deploy & Evaluate (The "Gauntlet")
+  # This step installs dependencies, deploys to Agent Engine, 
+  # and runs the evaluation against the live endpoint.
+  # ---------------------------------------------------------
+  - id: 'Deploy and Eval on Agent Engine'
+    name: 'python:3.13-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "🛠️  Installing dependencies..." && \
+        pip install uv && \
+        uv pip install --system . && \
+        
+        echo "📦 Installed Packages:" && \
+        uv pip freeze && \
+        
+        echo "🚀 Running Deployment & Evaluation Script..."
+        # Pass the Staging Bucket env var specifically here
+        python tests/deploy_and_eval.py
+    env:
+      - 'PROJECT_ID=$_PROJECT_ID'
+      - 'LOCATION=$_REGION'
+      - 'STAGING_BUCKET=$_STAGING_BUCKET'
+      - 'GOOGLE_GENAI_USE_VERTEXAI=TRUE'
+
+# Increase timeout to 20 minutes (1200s) because Agent Engine 
+# deployment takes ~10 minutes.
+timeout: 1200s
+
+substitutions:
+  _PROJECT_ID: "your-project-id" # Fallback, should be overridden
+  _REGION: "us-central1"
+  _STAGING_BUCKET: "gs://your-staging-bucket-name" # UPDATE THIS!

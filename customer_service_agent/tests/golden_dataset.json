@@ -1,0 +1,39 @@
+[
+  {
+    "prompt": "I need to check my past orders. My customer ID is CUST001.",
+    "reference_trajectory": [
+      {
+        "tool_name": "get_purchase_history",
+        "tool_input": {"customer_id": "CUST001"}
+      }
+    ],
+    "reference_response": "I found two orders...",
+    "category": "purchase_history"
+  },
+  {
+    "prompt": "I want a refund for order ORD-102 because it was damaged.",
+    "reference_trajectory": [
+      {
+        "tool_name": "issue_refund",
+        "tool_input": {"order_id": "ORD-102", "reason": "damaged"}
+      }
+    ],
+    "reference_response": "Refund processed...",
+    "category": "refund_action"
+  },
+  {
+    "prompt": "Check details for smart watch and then see if you have headphones.",
+    "reference_trajectory": [
+      {
+        "tool_name": "lookup_product_info",
+        "tool_input": {"product_name": "smart watch"}
+      },
+      {
+        "tool_name": "lookup_product_info",
+        "tool_input": {"product_name": "wireless headphones"}
+      }
+    ],
+    "reference_response": "The Smart Watch is $250. The Headphones are $120.",
+    "category": "multi_step"
+  }
+]
