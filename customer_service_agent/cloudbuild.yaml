@@ -5,7 +5,7 @@ steps:
   # and runs the evaluation against the live endpoint.
   # ---------------------------------------------------------
   - id: 'Deploy and Eval on Agent Engine'
-    name: 'python:3.11-slim'
+    name: 'python:3.13-slim'
     entrypoint: 'bash'
     args:
       - '-c'

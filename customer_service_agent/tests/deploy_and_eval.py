@@ -22,7 +22,7 @@ try:
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
     # No need to import adk_app here for Inline Source deployment, 
     # but we keep it for local validation if needed.
-    from agent import adk_app
+    from agent_package import adk_app
 except ImportError as e:
     print(f"Error importing agent: {e}")
     sys.exit(1)
@@ -56,9 +56,23 @@ if __name__ == "__main__":
     deployment_config = {
         "display_name": "Customer Service Agent",
         "description": "Retail customer service agent",
-        "source_packages": ["agent.py", "pyproject.toml", "README.md", "requirements.txt"],
-        "entrypoint_module": "agent",
+        "source_packages": ["agent_package", "pyproject.toml", "README.md", "requirements.txt"],
+        "entrypoint_module": "agent_package",
         "entrypoint_object": "adk_app",
+        "class_methods": [
+            {
+                "parameters": {},
+                "api_mode": "async_stream",
+                "description": "Stream responses from the agent",
+                "name": "async_stream_query",
+            },
+            {
+                "parameters": {},
+                "api_mode": "async",
+                "description": "Create a new session",
+                "name": "async_create_session",
+            },
+        ],
     }
 
     try:
