@@ -1,0 +1,5 @@
+google-adk>=1.18.0
+google-genai>=1.50.1
+python-dotenv>=1.2.1
+pandas
+google-cloud-aiplatform[agent_engines,evaluation]>=1.69.0

@@ -3,8 +3,11 @@ import os
 import json
 import pandas as pd
 import vertexai
-from vertexai.preview import agent_engines
-from vertexai.preview.evaluation import EvalTask, MetricPromptTemplateExamples
+from vertexai import agent_engines
+try:
+    from vertexai.evaluation import EvalTask, MetricPromptTemplateExamples
+except ImportError:
+    from vertexai.preview.evaluation import EvalTask, MetricPromptTemplateExamples
 
 # --- CONFIGURATION ---
 PROJECT_ID = os.environ.get("PROJECT_ID")
@@ -41,20 +44,24 @@ if __name__ == "__main__":
     # ---------------------------------------------------------
     # PART 1: DEPLOY TO AGENT ENGINE
     # ---------------------------------------------------------
-    print("\n⏳ Deploying Agent to Vertex AI Agent Engine...")
+    print("\n⏳ Deploying Agent to Vertex AI Agent Engine (Inline Source)...")
     print("(This process takes approximately 10-15 minutes)")
     
-    # We explicitly list requirements needed for the REMOTE environment
+    # Initialize Vertex AI Client
+    client = vertexai.Client(project=PROJECT_ID, location=LOCATION)
+
+    # Define the deployment configuration
+    deployment_config = {
+        "display_name": "Customer Service Agent",
+        "description": "Retail customer service agent",
+        "source_packages": ["agent.py", "pyproject.toml", "README.md", "requirements.txt"],
+        "entrypoint_module": "agent",
+        "entrypoint_object": "root_agent",
+    }
+
     try:
-        remote_agent = agent_engines.create(
-            local_agent,
-            requirements=[
-                "google-cloud-aiplatform[agent_engines,evaluation]",
-                "google-adk",
-                "pandas",
-                "python-dotenv"
-                # Add any other libraries your agent uses (e.g., 'requests', 'numpy')
-            ],
+        remote_agent = client.agent_engines.create(
+            config=deployment_config,
         )
         print(f"✅ Agent Deployed Successfully!")
         print(f"🔗 Resource Name: {remote_agent.resource_name}")
