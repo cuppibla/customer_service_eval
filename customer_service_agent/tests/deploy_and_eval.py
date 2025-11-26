@@ -81,7 +81,7 @@ if __name__ == "__main__":
             config=deployment_config,
         )
         print(f"✅ Agent Deployed Successfully!")
-        print(f"🔗 Resource Name: {remote_agent.resource_name}")
+        print(f"🔗 Resource Name: {remote_agent.api_resource.name}")
     except Exception as e:
         print(f"❌ Deployment Failed: {e}")
         sys.exit(1)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------
     # PART 3: RUN EVALUATION ON REMOTE AGENT
     # ---------------------------------------------------------
-    print(f"⚖️  Running Eval against Live Agent: {remote_agent.resource_name}")
+    print(f"⚖️  Running Eval against Live Agent: {remote_agent.api_resource.name}")
     
     eval_task = EvalTask(
         dataset=eval_dataset,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     )
 
     # Note: We pass 'remote_agent' here, not the local function!
-    results = eval_task.evaluate(runnable=remote_agent)
+    results = eval_task.evaluate(model=remote_agent)
 
     # ---------------------------------------------------------
     # PART 4: REPORTING & GATING
