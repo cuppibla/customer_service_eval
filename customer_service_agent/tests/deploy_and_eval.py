@@ -122,9 +122,20 @@ if __name__ == "__main__":
     # Define a wrapper function for the remote agent
     def remote_agent_inference(prompt):
         import asyncio
+        import vertexai
+        
+        # Create a new event loop for this thread to avoid conflicts
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
         async def run_query():
+            # Create a fresh client and agent handle for this thread
+            thread_client = vertexai.Client(project=PROJECT_ID, location=LOCATION)
+            agent_resource_name = remote_agent.api_resource.name
+            thread_agent = thread_client.agent_engines.get(name=agent_resource_name)
+            
             text_response = ""
-            async for event in remote_agent.async_stream_query(
+            async for event in thread_agent.async_stream_query(
                 message=prompt,
                 user_id="eval_user"
             ):
@@ -149,7 +160,11 @@ if __name__ == "__main__":
                             elif hasattr(part, "text"):
                                 text_response += part.text
             return text_response
-        return asyncio.run(run_query())
+        
+        try:
+            return loop.run_until_complete(run_query())
+        finally:
+            loop.close()
 
     # Note: We pass the wrapper function here, not the raw object!
     results = eval_task.evaluate(model=remote_agent_inference)
