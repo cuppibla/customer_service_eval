@@ -119,8 +119,16 @@ if __name__ == "__main__":
         experiment="ci-agent-engine-deploy"
     )
 
-    # Note: We pass 'remote_agent' here, not the local function!
-    results = eval_task.evaluate(model=remote_agent)
+    # Define a wrapper function for the remote agent
+    def remote_agent_inference(prompt):
+        # The EvalTask passes a prompt, we need to return the text response
+        # For ADK agents, we use query() or chat() depending on the setup.
+        # Here we assume a simple query call.
+        response = remote_agent.query(input=prompt)
+        return response.output
+
+    # Note: We pass the wrapper function here, not the raw object!
+    results = eval_task.evaluate(model=remote_agent_inference)
 
     # ---------------------------------------------------------
     # PART 4: REPORTING & GATING
