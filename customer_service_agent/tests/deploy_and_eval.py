@@ -121,11 +121,35 @@ if __name__ == "__main__":
 
     # Define a wrapper function for the remote agent
     def remote_agent_inference(prompt):
-        # The EvalTask passes a prompt, we need to return the text response
-        # For ADK agents, we use query() or chat() depending on the setup.
-        # Here we assume a simple query call.
-        response = remote_agent.query(input=prompt)
-        return response.output
+        import asyncio
+        async def run_query():
+            text_response = ""
+            async for event in remote_agent.async_stream_query(
+                message=prompt,
+                user_id="eval_user"
+            ):
+                # Handle different event formats (dict or object)
+                content = None
+                if isinstance(event, dict):
+                    content = event.get("content")
+                elif hasattr(event, "content"):
+                    content = event.content
+                
+                if content:
+                    parts = None
+                    if isinstance(content, dict):
+                        parts = content.get("parts")
+                    elif hasattr(content, "parts"):
+                        parts = content.parts
+                    
+                    if parts:
+                        for part in parts:
+                            if isinstance(part, dict):
+                                text_response += part.get("text", "")
+                            elif hasattr(part, "text"):
+                                text_response += part.text
+            return text_response
+        return asyncio.run(run_query())
 
     # Note: We pass the wrapper function here, not the raw object!
     results = eval_task.evaluate(model=remote_agent_inference)
